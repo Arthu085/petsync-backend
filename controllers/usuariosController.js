@@ -3,14 +3,14 @@ const bcrypt = require('bcrypt');
 
 const getUsuario = async (req, res) => {
     try {
-        // Usando $1 para parâmetro, evitando a interpolação direta de string
-        const result = await pool.query('SELECT a.*, b.nome_acesso FROM petsync.usuarios a INNER JOIN petsync.acessos b  ON a.id_acesso = b.id_acesso WHERE a.email <> $1 ORDER BY a.id_usuario', ['admin@gmail.com']);
-        res.status(200).json({ data: result.rows });
+      const result = await pool.query('SELECT a.*, b.nome_acesso FROM petsync.usuarios a INNER JOIN petsync.acessos b ON a.id_acesso = b.id_acesso WHERE a.email <> $1 ORDER BY a.id_usuario', 
+        ['admin@gmail.com']); 
+      res.status(200).json({ data: result.rows });
     } catch (err) {
-        console.error(err);
-        res.status(500).json({ message: 'Erro ao obter usuários', err });
+      console.error(err);
+      res.status(500).json({ message: 'Erro ao obter usuários', err });
     }
-};
+  };
 
 const deleteUsuario = async (req, res) => {
     const id  = req.params.id;
