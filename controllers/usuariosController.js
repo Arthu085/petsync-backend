@@ -3,7 +3,7 @@ const bcrypt = require('bcrypt');
 
 const getUsuario = async(req, res) => {
     try {
-        const result = await pool.query('SELECT * FROM petsync.usuarios WHERE id_usuario != 6 ORDER BY id_usuario');
+        const result = await pool.query('SELECT * FROM petsync.usuarios WHERE email <> $1 ORDER BY id_usuario', ['admin@gmail.com']);
         res.status(200).json({ data: result.rows });
     } catch (err) {
         console.error(err);

@@ -22,7 +22,7 @@ const getAnimalNumber = async(req, res) => {
 
 const getUsuarioNumber = async(req, res) => {
     try {
-        const result = await pool.query('SELECT COUNT(*) FROM petsync.usuarios WHERE id_usuario != 6');
+        const result = await pool.query('SELECT COUNT(*) FROM petsync.usuarios WHERE email NOT LIKE "admin@gmail.com"');
         res.status(200).json( {data: result.rows } );
     } catch (err) {
         console.error(err);
