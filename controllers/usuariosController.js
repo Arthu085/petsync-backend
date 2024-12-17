@@ -1,9 +1,10 @@
 const pool = require('../db');
 const bcrypt = require('bcrypt');
 
-const getUsuario = async(req, res) => {
+const getUsuario = async (req, res) => {
     try {
-        const result = await pool.query('SELECT * FROM petsync.usuarios WHERE email <> $1 ORDER BY id_usuario', ['admin@gmail.com']);
+        // Usando $1 para parâmetro, evitando a interpolação direta de string
+        const result = await pool.query('SELECT a.*, b.nome_acesso FROM petsync.usuarios a INNER JOIN petsync.acessos b  ON a.id_acesso = b.id_acesso WHERE a.email <> $1 ORDER BY a.id_usuario', ['admin@gmail.com']);
         res.status(200).json({ data: result.rows });
     } catch (err) {
         console.error(err);

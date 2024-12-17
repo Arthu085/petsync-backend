@@ -17,7 +17,7 @@ module.exports = pool;
 
 // Rota para criar um usuário
 router.post('/registrar', async (req, res) => {
-  const { email, senha, id_acesso } = req.body;
+  const { email, senha, id_acesso: IdAcessoInt } = req.body;
 
   try {
     // Verificar se o email já está cadastrado
@@ -25,22 +25,22 @@ router.post('/registrar', async (req, res) => {
     if (result.rows.length > 0) {
       return res.status(400).json({ message: 'Email já cadastrado.' });
     }
-
+  
     // Gerando o hash da senha
     const hashedPassword = await bcrypt.hash(senha, 10); // 10 é o número de rounds para o bcrypt
-
+  
     // Inserir o novo usuário com o hash da senha
     const insertResult = await pool.query(
       'INSERT INTO petsync.usuarios (email, senha, id_acesso) VALUES ($1, $2, $3) RETURNING *',
-      [email, hashedPassword, id_acesso]
+      [email, hashedPassword, IdAcessoInt]
     );
-
+  
     // Enviar resposta de sucesso
     return res.status(201).json({ message: 'Usuário criado com sucesso!', usuario: insertResult.rows[0] });
   } catch (err) {
-    console.error(err);
-    return res.status(500).json({ error: 'Erro ao criar o usuário' });
-  }
+    console.error('Erro no backend:', err);
+    return res.status(500).json({ error: 'Erro ao criar o usuário', details: err.message });
+  }  
 });
 
 module.exports = router;
