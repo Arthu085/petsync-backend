@@ -32,24 +32,19 @@ const deleteUsuario = async (req, res) => {
 
 const editUsuario = async (req, res) => {
     const { id_usuario } = req.params;
-    const { email, senha } = req.body;
+    const { email, senha, id_acesso } = req.body; // Use id_acesso consistentemente
 
     try {
-        // Verificar se o usuário existe
         const result = await pool.query('SELECT * FROM petsync.usuarios WHERE id_usuario = $1', [id_usuario]);
         if (result.rows.length === 0) {
             return res.status(404).json({ message: 'Usuário não encontrado.' });
         }
 
-        // Preparar os campos para a atualização
         let query = 'UPDATE petsync.usuarios SET';
         const params = [];
         let paramIndex = 1;
-
-        // Flag para verificar se algo foi adicionado à query
         let fieldsAdded = false;
 
-        // Se o novo email foi fornecido, adicionar à query
         if (email) {
             query += ` email = $${paramIndex},`;
             params.push(email);
@@ -57,9 +52,7 @@ const editUsuario = async (req, res) => {
             fieldsAdded = true;
         }
 
-        // Se a nova senha foi fornecida, adicionar à query
         if (senha) {
-            // Gerar o hash da nova senha
             const hashedPassword = await bcrypt.hash(senha, 10);
             query += ` senha = $${paramIndex},`;
             params.push(hashedPassword);
@@ -67,29 +60,31 @@ const editUsuario = async (req, res) => {
             fieldsAdded = true;
         }
 
-        // Se nenhum campo foi adicionado, retornar erro
+        if (id_acesso) {
+            const idAcessoNumber = parseInt(id_acesso, 10);
+            query += ` id_acesso = $${paramIndex},`;
+            params.push(idAcessoNumber);
+            paramIndex++;
+            fieldsAdded = true;
+        }
+
         if (!fieldsAdded) {
             return res.status(400).json({ message: 'Nenhum dado para atualização fornecido.' });
         }
 
-        // Remover a vírgula final
         query = query.slice(0, -1);
-
-        // Finalizar a query
         query += ' WHERE id_usuario = $' + paramIndex;
         params.push(id_usuario);
 
-        // Executar a atualização no banco de dados
         const updatedResult = await pool.query(query, params);
 
-        // Enviar resposta de sucesso
         return res.status(200).json({
             message: 'Usuário atualizado com sucesso!',
-            usuario: updatedResult.rows[0]
+            usuario: updatedResult.rows[0] // Pode ser null se nada foi atualizado
         });
     } catch (err) {
         console.error(err);
-        return res.status(500).json({ error: 'Erro ao atualizar o usuário' });
+        return res.status(500).json({ error: 'Erro ao atualizar o usuário', details: err.message }); // Inclua detalhes do erro para depuração
     }
 };
 
