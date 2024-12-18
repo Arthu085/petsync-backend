@@ -1,40 +1,44 @@
 const express = require('express');
 const bcrypt = require('bcrypt');
+const jwt = require('jsonwebtoken'); // Para gerar tokens de autenticação
 const router = express.Router();
-const db = require('../db'); 
+const db = require('../db');
+
+const JWT_SECRET = 'sua_chave_secreta'; // Substitua por uma chave secreta segura
 
 router.post('/login', async (req, res) => {
-  const { email, password } = req.body; 
+  const { email, password } = req.body;
 
   if (!email || !password) {
     return res.status(400).json({ success: false, message: 'Email e senha são obrigatórios' });
   }
 
   try {
-    // Obter usuário do banco de dados
     const usuario = await db.query('SELECT * FROM petsync.usuarios WHERE email = $1', [email]);
 
-    // Verificar se o usuário existe
     if (!usuario.rows.length) {
       return res.status(404).json({ success: false, message: 'Email não encontrado' });
     }
 
-    const hash = usuario.rows[0].senha; // Obter hash armazenado
-
-    // Verificar se o hash foi encontrado
-    if (!hash) {
-      return res.status(500).json({ success: false, message: 'Senha do usuário está inválida no banco de dados' });
-    }
-
-    // Comparar senha com o hash
-    const match = await bcrypt.compare(password, hash); // Alterado para "password" para coincidir com o frontend
+    const user = usuario.rows[0];
+    const match = await bcrypt.compare(password, user.senha);
 
     if (!match) {
       return res.status(401).json({ success: false, message: 'Senha inválida' });
     }
 
-    // Retornar sucesso (exemplo: token de autenticação ou apenas uma mensagem de sucesso)
-    res.status(200).json({ success: true, message: 'Login bem-sucedido' });
+    // Gerar um token de autenticação (JWT)
+    const token = jwt.sign({ userId: user.id_usuario, accessType: Number(user.id_acesso) }, JWT_SECRET, {
+      expiresIn: '1h',
+    });
+
+    res.status(200).json({
+      success: true,
+      message: 'Login bem-sucedido',
+      token: token,
+      accessType: Number(user.id_acesso),  // Convertendo para número
+    });
+
   } catch (error) {
     console.error('Erro ao fazer login:', error);
     res.status(500).json({ success: false, message: 'Erro interno no servidor' });
