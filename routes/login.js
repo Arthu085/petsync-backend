@@ -1,10 +1,10 @@
 const express = require('express');
 const bcrypt = require('bcrypt');
-const jwt = require('jsonwebtoken'); // Para gerar tokens de autenticação
+const jwt = require('jsonwebtoken'); 
 const router = express.Router();
 const db = require('../db');
 
-const JWT_SECRET = 'sua_chave_secreta'; // Substitua por uma chave secreta segura
+const JWT_SECRET = '2020'; 
 
 router.post('/login', async (req, res) => {
   const { email, password } = req.body;
