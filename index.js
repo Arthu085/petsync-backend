@@ -9,6 +9,7 @@ const clientesRoutes = require('./routes/clientes');
 const animaisRoutes = require('./routes/animais');
 const usuariosRoutes = require('./routes/usuarios');
 const dashboardRoutes = require('./routes/dashboard');
+const agendamentosRoutes = require('./routes/agendamento');
 
 const app = express();
 
@@ -27,6 +28,7 @@ app.use('/api', clientesRoutes); // Registrando a rota de login
 app.use('/api', animaisRoutes);
 app.use('/api', usuariosRoutes);
 app.use('/api', dashboardRoutes);
+app.use('/api', agendamentosRoutes);
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
