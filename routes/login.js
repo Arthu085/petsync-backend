@@ -17,14 +17,14 @@ router.post('/login', async (req, res) => {
     const usuario = await db.query('SELECT * FROM petsync.usuarios WHERE email = $1', [email]);
 
     if (!usuario.rows.length) {
-      return res.status(404).json({ success: false, message: 'Email não encontrado' });
+      return res.status(404).json({ success: false, message: 'E-mail ou senha inválidos.' });
     }
 
     const user = usuario.rows[0];
     const match = await bcrypt.compare(password, user.senha);
 
     if (!match) {
-      return res.status(401).json({ success: false, message: 'Senha inválida' });
+      return res.status(401).json({ success: false, message: 'E-mail ou senha inválidos.' });
     }
 
     // Gerar um token de autenticação (JWT)
